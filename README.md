@@ -1,6 +1,6 @@
 # mhc2gcal
 
-## USAGE
+## SETUP
 
 * Install google-api-client
 
@@ -12,6 +12,16 @@
 * Authorize the application and generate .google-api.yaml
 
 > % google-api oauth-2-login --scope=https://www.googleapis.com/auth/calendar --client-id=CLIENT_ID --client-secret=CLIENT_SECRET
+
+* copy gcal.yaml to ~/.gcal
+
+> % cp gcal.yaml ~/.gcal
+
+* Enjoy!
+
+## USAGE
+
+> mhc2gcal.rb --help
 
 ## TODO
 

@@ -120,6 +120,7 @@ end
 MHC2GCAL_VERSION = '0.5.0'
 
 oauth_yaml = YAML.load_file(File.expand_path('~/.google-api.yaml',  File.dirname($0)))
+gcal_yaml  = YAML.load_file(File.expand_path('~/.gcal',  File.dirname($0)))
 date_from   = date_to = MhcDate .new
 category   = '!Holiday'
 secret     = 'Private'
@@ -184,7 +185,7 @@ if client.authorization.refresh_token && client.authorization.expired?
   client.authorization.fetch_access_token!
 end
 
-if oauth_yaml["gcal_mode"] == 'delete'
+if gcal_yaml["gcal_mode"] == 'delete'
   GCAL_DEL = true
 else
   GCAL_DEL = false
