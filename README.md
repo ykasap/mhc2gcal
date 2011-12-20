@@ -12,3 +12,9 @@
 * Authorize the application and generate .google-api.yaml
 
 > % google-api oauth-2-login --scope=https://www.googleapis.com/auth/calendar --client-id=CLIENT_ID --client-secret=CLIENT_SECRET
+
+## TODO
+
+* Bug: Duplication checking is failure with allday-event
+
+* HTTP Proxy is temporally disabled
