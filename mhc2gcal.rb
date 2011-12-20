@@ -83,8 +83,6 @@ def string_to_date2(s1, s2)
   return item
 end
 
-oauth_yaml = YAML.load_file(File.expand_path('~/.google-api.yaml',  File.dirname($0)))
-gcal_yaml  = YAML.load_file(File.expand_path('~/.gcal',  File.dirname($0)))
 date_from  = date_to = MhcDate .new
 proxy_mode = false
 proxy_auth = false
@@ -111,7 +109,6 @@ opt.on('--verbose', 'Verbose mode') { OPTS[:verbose] = true }
 #opt.on('--proxy-port=port', 'Set the port number of http proxy') { |v| OPTS[:proxy_port] = v }
 #opt.on('--proxy-user=user', 'Set the username of http proxy') { |v| OPTS[:proxy_user] = v }
 #opt.on('--proxy-pass=pass', 'Set the password of http proxy') { |v| OPTS[:proxy_pass] = v }
-#opt.on('--config-file=file', 'Set the name of configuration file') { |v| OPTS[:gcal_yaml] = v }
 opt.parse!(ARGV)
 
 case (OPTS[:date])
@@ -138,6 +135,9 @@ if OPTS[:secret]
   secrets = OPTS[:secret].split.collect{|x| x .downcase}
 end
 
+oauth_yaml = YAML.load_file(File.expand_path('~/.google-api.yaml'))
+gcal_yaml  = YAML.load_file(File.expand_path('~/.gcal'))
+
 client = Google::APIClient.new
 client.authorization.client_id = oauth_yaml["client_id"]
 client.authorization.client_secret = oauth_yaml["client_secret"]
@@ -161,23 +161,23 @@ end
 #   if proxy_auth
 #     GoogleCalendar::Service.proxy_user=proxy_user
 #     GoogleCalendar::Service.proxy_pass=proxy_pass
-#     puts "Connect to Google Calendar through proxy(#{proxy_user}:#{proxy_pass}@#{proxy_addr}:#{proxy_port})\n"
+#     puts "Connect to Google Calendar through proxy(#{proxy_user}:#{proxy_pass}@#{proxy_addr}:#{proxy_port})"
 #   else
-#     puts "Connect to Google Calendar through proxy(#{proxy_addr}:#{proxy_port})\n"
+#     puts "Connect to Google Calendar through proxy(#{proxy_addr}:#{proxy_port})"
 #   end
 # else
-#   puts "Connect to Google Calendar directly\n"
+#   puts "Connect to Google Calendar directly"
 # end
 
 srv = client.discovered_api('calendar', 'v3')
-puts "Connected\n"
+puts "Connected"
 
 # init arrays for EVENTs in Google Calendar and MHC
 gcal_gevs=[]
 mhc_gevs=[]
 
 # collect EVENTs from Google Calendarin the period of date
-puts "Collect EVENTs from Google Calendar\n"
+puts "Collect EVENTs from Google Calendar"
 stg_date = date_from.dec(90)
 stgcal = Time.mktime(stg_date.y.to_i, stg_date.m.to_i, stg_date.d.to_i, 0, 0, 0).gmtime.xmlschema
 st = Time.mktime(date_from.y.to_i, date_from.m.to_i, date_from.d.to_i, 0, 0, 0).gmtime.xmlschema
@@ -210,7 +210,7 @@ while true
 end
 
 # collect EVENTs from MHC in the period of date
-puts "Collect EVENTs from MHC\n"
+puts "Collect EVENTs from MHC"
 db = MhcScheduleDB .new
 db .search(date_from, date_to, OPTS[:category]) .each{|date, mevs|
   mevs .each {|mev|
@@ -307,13 +307,13 @@ gcal_gevs.each{|gcal_gev|
     end
     if OPTS[:verbose]
       if GCAL_DEL
-        puts "Delete events only in Google Calendar\n"
+        puts "Delete event only in Google Calendar"
       else
-        puts "Keep events only in Google Calendar\n"
+        puts "Keep event only in Google Calendar"
       end
-      puts "  What: #{gcal_gev['summary']}\n"
-      puts "  When: #{gcal_gev['start']} - #{gcal_gev['end']}\n"
-      puts "  Where: #{gcal_gev['location']}\n"
+      puts "  What: #{gcal_gev['summary']}"
+      puts "  When: #{gcal_gev['start']} - #{gcal_gev['end']}"
+      puts "  Where: #{gcal_gev['location']}"
     end
   end
 }
@@ -339,10 +339,10 @@ mhc_gevs.each{|mhc_gev|
                             :body => JSON.dump(mhc_gev),
                             :headers => {'Content-Type' => 'application/json'})
     if OPTS[:verbose]
-      puts "Create EVENT only in MHC\n"
-      puts "  What: #{mhc_gev['summary']}\n"
-      puts "  When: #{mhc_gev['start']} - #{mhc_gev['end']}\n"
-      puts "  Where: #{mhc_gev['location']}\n"
+      puts "Create EVENT only in MHC"
+      puts "  What: #{mhc_gev['summary']}"
+      puts "  When: #{mhc_gev['start']} - #{mhc_gev['end']}"
+      puts "  Where: #{mhc_gev['location']}"
     end
   end
 }
