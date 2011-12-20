@@ -14,6 +14,8 @@
 ## "ol2gcal" is also base code of mhc2gcal
 ## Original author: <zoriorz@gmail.com>
 
+Version = '0.5.0'
+
 require 'yaml'
 require 'rubygems'
 require 'google/api_client'
@@ -21,38 +23,7 @@ require 'date'
 require 'mhc-schedule'
 require 'mhc-kconv'
 require 'nkf'
-
-def usage(do_exit = true)
-  STDERR .print "usage: #{$0} [options]
-  Upload your MHC schedule to Google Calendar:
-  --help               show this message.
-  --category=CATEGORY  pick only in CATEGORY. 
-                       '!' and space separated multiple values are allowed.
-  --secret=CATEGORY    change the title of the event to 'SECRET'
-                       space separated multiple values are allowed.
-  --date={string[+n],string-string}
-                       set a period of date.
-                       string is one of these:
-                         today, tomorrow, sun ... sat, yyyymmdd, yyyymm, yyyy
-                       yyyymm lists all days in the month and yyyy lists all
-                       days in the year.
-                       list n+1 days of schedules if +n is given.
-                       default value is 'today+0'
-  --description        add description.
-  --verbose            verbose mode.
-  --proxy-addr=addr    set the address of http proxy.
-  --proxy-port=port    set the port number of http proxy.
-  --proxy-user=user    set the username of http proxy.
-  --proxy-pass=pass    set the password of http proxy.
-  --config-file=file   set the name of configuration file.
-  --version            display the version of mhc2gcal and exit.\n"
-  exit if do_exit
-end
-
-def version(do_exit = true)
-  puts "mhc2gcal version #{MHC2GCAL_VERSION}\n"
-  exit if do_exit
-end
+require 'optparse'
 
 def string_to_date(string, range)
   date_from = nil
@@ -112,62 +83,59 @@ def string_to_date2(s1, s2)
   return item
 end
 
-MHC2GCAL_VERSION = '0.5.0'
-
 oauth_yaml = YAML.load_file(File.expand_path('~/.google-api.yaml',  File.dirname($0)))
 gcal_yaml  = YAML.load_file(File.expand_path('~/.gcal',  File.dirname($0)))
-date_from   = date_to = MhcDate .new
-category   = '!Holiday'
-secret     = 'Private'
-verbose     = false
-description = false
-proxy_mode  = false
-proxy_auth  = false
+date_from  = date_to = MhcDate .new
+proxy_mode = false
+proxy_auth = false
 
-while option = ARGV .shift
-  case (option)
-  when /^--category=(.+)/
-    category = $1
-  when /^--secret=(.+)/
-    secret = $1
-  when /^--date=([^-]+)\-(.+)/
-    date_from, date_to = string_to_date2($1, $2) || usage()
-  when /^--date=([^+]+)(\+(-?[\d]+))?/
-    date_from, date_to = string_to_date($1, $3) || usage()
-  when /^--description/
-    description = true
-  when /^--verbose/
-    verbose = true
-  when /^--proxy-addr=(.+)/
-    proxy_addr = $1
-  when /^--proxy-port=(.+)/
-    proxy_port = $1
-  when /^--proxy-user=(.+)/
-    proxy_user = $1
-  when /^--proxy-pass=(.+)/
-    proxy_pass = $1
-  when /^--config-file=(.+)/
-    gcal_yaml = $1
-  when /^--version/
-    version()
-  else
-    usage()
-  end
+OPTS = {}
+OPTS[:category]    = '!Holiday'
+OPTS[:secret]      = 'Private'
+OPTS[:verbose]     = false
+OPTS[:description] = false
+
+opt = OptionParser.new
+opt.on('--category=CATEGORY',
+       'Pick only in CATEGORY. \'!\' and space separated multiple values are allowed') {
+  |v| OPTS[:category] = v }
+opt.on('--secret=CATEGORY',
+       'Change the title of the event to \'SECRET\' space separated multiple values are allowed') {
+  |v| OPTS[:secret] = v }
+opt.on('--date={string[+n],string-string}',
+       'Set a period of date. string is one of these: today, tomorrow, sun ... sat, yyyymmdd, yyyymm, yyyyyyyymm lists all days in the month and yyyy lists all days in the year. List n+1 days of schedules if +n is given. The default value is \'today+0\'') {
+  |v| OPTS[:date] = v }
+opt.on('--description', 'Add description') { OPTS[:description] = true }
+opt.on('--verbose', 'Verbose mode') { OPTS[:verbose] = true }
+#opt.on('--proxy-addr=addr', 'Set the address of http proxy') { |v| OPTS[:proxy_addr] = v }
+#opt.on('--proxy-port=port', 'Set the port number of http proxy') { |v| OPTS[:proxy_port] = v }
+#opt.on('--proxy-user=user', 'Set the username of http proxy') { |v| OPTS[:proxy_user] = v }
+#opt.on('--proxy-pass=pass', 'Set the password of http proxy') { |v| OPTS[:proxy_pass] = v }
+#opt.on('--config-file=file', 'Set the name of configuration file') { |v| OPTS[:gcal_yaml] = v }
+opt.parse!(ARGV)
+
+case (OPTS[:date])
+when /^([^-]+)\-(.+)/
+  date_from, date_to = string_to_date2($1, $2) || abort("Abort: Date option is wrong")
+when /^([^+]+)(\+(-?[\d]+))?/
+  date_from, date_to = string_to_date($1, $3) || abort("Abort: Date option is wrong")
+else
+  abort("Abort: Date option is wrong")
 end
 
-if proxy_addr && proxy_port
+if OPTS[:proxy_addr] && OPTS[:proxy_port]
   proxy_mode = true
-  if proxy_user && proxy_pass
+  if OPTS[:proxy_user] && OPTS[:proxy_pass]
     proxy_auth = true
   end
 end
 
 secrets = nil
-if secret
-  if secret =~ /!/
-    secret = secret .delete('!')
+if OPTS[:secret]
+  if OPTS[:secret] =~ /!/
+    OPTS[:secret] = OPTS[:secret].delete('!')
   end
-  secrets = secret .split .collect{|x| x .downcase}
+  secrets = OPTS[:secret].split.collect{|x| x .downcase}
 end
 
 client = Google::APIClient.new
@@ -244,7 +212,7 @@ end
 # collect EVENTs from MHC in the period of date
 puts "Collect EVENTs from MHC\n"
 db = MhcScheduleDB .new
-db .search(date_from, date_to, category) .each{|date, mevs|
+db .search(date_from, date_to, OPTS[:category]) .each{|date, mevs|
   mevs .each {|mev|
     secret_event = false
     secrets.each{|secret_category|
@@ -282,7 +250,7 @@ db .search(date_from, date_to, category) .each{|date, mevs|
       en = allday_end.to_s
       allday = true
     end
-    if description == true
+    if OPTS[:description]
       headers = "Category: " + mev .category_as_string + "\n"
       switch = false
       mev .non_xsc_header .split("\n") .each{|line|
@@ -311,8 +279,6 @@ db .search(date_from, date_to, category) .each{|date, mevs|
       event['end'] = { 'dateTime' => en }
     end
     mhc_gevs.push(event)
-    if verbose == true
-    end
   }
 }
 
@@ -339,7 +305,7 @@ gcal_gevs.each{|gcal_gev|
       result = client.execute(:api_method => srv.events.delete,
                               :parameters => {'calendarId' => CALENDER_ID, 'eventId' => gcal_gev['id']})
     end
-    if verbose == true
+    if OPTS[:verbose]
       if GCAL_DEL
         puts "Delete EVENT only in Google Calendar\n"
       else
@@ -372,7 +338,7 @@ mhc_gevs.each{|mhc_gev|
                             :parameters => {'calendarId' => oauth_yaml["calender_id"]},
                             :body => JSON.dump(mhc_gev),
                             :headers => {'Content-Type' => 'application/json'})
-    if verbose == true
+    if OPTS[:verbose]
       puts "Create EVENT only in MHC\n"
       puts "  What: #{mhc_gev['summary']}\n"
       puts "  When: #{mhc_gev['start']} - #{mhc_gev['end']}\n"
