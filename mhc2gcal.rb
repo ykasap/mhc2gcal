@@ -307,9 +307,9 @@ gcal_gevs.each{|gcal_gev|
     end
     if OPTS[:verbose]
       if GCAL_DEL
-        puts "Delete EVENT only in Google Calendar\n"
+        puts "Delete events only in Google Calendar\n"
       else
-        puts "Keep EVENT only in Google Calendar\n"
+        puts "Keep events only in Google Calendar\n"
       end
       puts "  What: #{gcal_gev['summary']}\n"
       puts "  When: #{gcal_gev['start']} - #{gcal_gev['end']}\n"
