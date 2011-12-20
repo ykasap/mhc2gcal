@@ -185,6 +185,7 @@ if client.authorization.refresh_token && client.authorization.expired?
   client.authorization.fetch_access_token!
 end
 
+CALENDER_ID = oauth_yaml["calender_id"]
 if gcal_yaml["gcal_mode"] == 'delete'
   GCAL_DEL = true
 else
@@ -222,7 +223,7 @@ en = Time.mktime(date_to.y.to_i, date_to.m.to_i, date_to.d.to_i, 23, 59, 59).gmt
 
 page_token = nil
 result = client.execute(:api_method => srv.events.list,
-                        :parameters => {'calendarId' => oauth_yaml["calender_id"],
+                        :parameters => {'calendarId' => CALENDER_ID,
                           'maxResults' => '100',
                           'timeZone' => 'Japan/Tokyo',
                           'timeMin' => stgcal,
@@ -238,7 +239,7 @@ while true
     break
   end
   result = client.execute(:api_method => srv.events.list,
-                          :parameters => {'calendarId' => oauth_yaml["calender_id"],
+                          :parameters => {'calendarId' => CALENDER_ID,
                             'maxResults' => '100',
                             'timeZone' => 'Japan/Tokyo',
                             'timeMin' => stgcal,
@@ -342,8 +343,7 @@ gcal_gevs.each{|gcal_gev|
   if find_the_same_event != true
     if GCAL_DEL
       result = client.execute(:api_method => srv.events.delete,
-                              :parameters => {'calendarId' => oauth_yaml["calender_id"],
-                                'eventId' => gcal_gev['id']})
+                              :parameters => {'calendarId' => CALENDER_ID, 'eventId' => gcal_gev['id']})
     end
     if verbose == true
       if GCAL_DEL
