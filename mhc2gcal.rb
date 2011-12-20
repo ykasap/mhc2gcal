@@ -61,16 +61,12 @@ def string_to_date(string, range)
   case (string .downcase)
   when 'today'
     date_from = MhcDate .new
-
   when 'tomorrow'
     date_from = MhcDate .new .succ
-
   when /^(sun|mon|tue|wed|thu|fri|sat)/
     date_from = MhcDate .new .w_this(string .downcase)
-
   when /^\d{8}$/
     date_from = MhcDate .new(string)
-
   when /^\d{6}$/
     date_from = MhcDate .new(string + '01')
     if range
@@ -78,7 +74,6 @@ def string_to_date(string, range)
     else
       date_to = MhcDate .new(string + format("%02d", date_from .m_days))
     end
-
   when /^\d{4}$/
     date_from = MhcDate .new(string + '0101')
     if range
@@ -207,7 +202,6 @@ end
 # end
 
 srv = client.discovered_api('calendar', 'v3')
-
 puts "Connected\n"
 
 # init arrays for EVENTs in Google Calendar and MHC
@@ -266,9 +260,9 @@ db .search(date_from, date_to, category) .each{|date, mevs|
       title = NKF.nkf("-w", mev.subject)
     end
     if mev.location and mev.location != ""
-      where =  NKF.nkf("-w", mev.location)
+      where = NKF.nkf("-w", mev.location)
     else
-      where =  ""
+      where = ""
     end
     if mev.time_b.to_s != ""
       st = Time.parse(date.y.to_s + "/" + date.m.to_s + "/" + date.d.to_s + " " + mev.time_b.to_s).gmtime.xmlschema
