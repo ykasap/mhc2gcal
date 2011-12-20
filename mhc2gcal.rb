@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# -*- ruby -*-
+# -*- encoding: utf-8 -*-
 
 ## mhc2gcal
 ## Copyright (C) 2007 Nao Kawanishi <river2470@gmail.com>
@@ -50,7 +50,7 @@ def usage(do_exit = true)
 end
 
 def version(do_exit = true)
-  STDOUT .print "mhc2gcal version #{MHC2GCAL_VERSION}\n"
+  puts "mhc2gcal version #{MHC2GCAL_VERSION}\n"
   exit if do_exit
 end
 
@@ -197,24 +197,24 @@ end
 #   if proxy_auth
 #     GoogleCalendar::Service.proxy_user=proxy_user
 #     GoogleCalendar::Service.proxy_pass=proxy_pass
-#     STDOUT .print "Connect to Google Calendar through proxy(#{proxy_user}:#{proxy_pass}@#{proxy_addr}:#{proxy_port})\n"
+#     puts "Connect to Google Calendar through proxy(#{proxy_user}:#{proxy_pass}@#{proxy_addr}:#{proxy_port})\n"
 #   else
-#     STDOUT .print "Connect to Google Calendar through proxy(#{proxy_addr}:#{proxy_port})\n"
+#     puts "Connect to Google Calendar through proxy(#{proxy_addr}:#{proxy_port})\n"
 #   end
 # else
-#   STDOUT .print "Connect to Google Calendar directly\n"
+#   puts "Connect to Google Calendar directly\n"
 # end
 
 srv = client.discovered_api('calendar', 'v3')
 
-STDOUT .print "Connected\n"
+puts "Connected\n"
 
 # init arrays for EVENTs in Google Calendar and MHC
 gcal_gevs=[]
 mhc_gevs=[]
 
 # collect EVENTs from Google Calendarin the period of date
-STDOUT .print "Collect EVENTs from Google Calendar\n"
+puts "Collect EVENTs from Google Calendar\n"
 stg_date = date_from.dec(90)
 stgcal = Time.mktime(stg_date.y.to_i, stg_date.m.to_i, stg_date.d.to_i, 0, 0, 0).gmtime.xmlschema
 st = Time.mktime(date_from.y.to_i, date_from.m.to_i, date_from.d.to_i, 0, 0, 0).gmtime.xmlschema
@@ -247,7 +247,7 @@ while true
 end
 
 # collect EVENTs from MHC in the period of date
-STDOUT .print "Collect EVENTs from MHC\n"
+puts "Collect EVENTs from MHC\n"
 db = MhcScheduleDB .new
 db .search(date_from, date_to, category) .each{|date, mevs|
   mevs .each {|mev|
@@ -347,13 +347,13 @@ gcal_gevs.each{|gcal_gev|
     end
     if verbose == true
       if GCAL_DEL
-        STDOUT .print "Delete EVENT only in Google Calendar\n"
+        puts "Delete EVENT only in Google Calendar\n"
       else
-        STDOUT .print "Keep EVENT only in Google Calendar\n"
+        puts "Keep EVENT only in Google Calendar\n"
       end
-      STDOUT .print "  What: #{gcal_gev['summary']}\n"
-      STDOUT .print "  When: #{gcal_gev['start']} - #{gcal_gev['end']}\n"
-      STDOUT .print "  Where: #{gcal_gev['location']}\n"
+      puts "  What: #{gcal_gev['summary']}\n"
+      puts "  When: #{gcal_gev['start']} - #{gcal_gev['end']}\n"
+      puts "  Where: #{gcal_gev['location']}\n"
     end
   end
 }
@@ -379,10 +379,10 @@ mhc_gevs.each{|mhc_gev|
                             :body => JSON.dump(mhc_gev),
                             :headers => {'Content-Type' => 'application/json'})
     if verbose == true
-      STDOUT .print "Create EVENT only in MHC\n"
-      STDOUT .print "  What: #{mhc_gev['summary']}\n"
-      STDOUT .print "  When: #{mhc_gev['start']} - #{mhc_gev['end']}\n"
-      STDOUT .print "  Where: #{mhc_gev['location']}\n"
+      puts "Create EVENT only in MHC\n"
+      puts "  What: #{mhc_gev['summary']}\n"
+      puts "  When: #{mhc_gev['start']} - #{mhc_gev['end']}\n"
+      puts "  Where: #{mhc_gev['location']}\n"
     end
   end
 }
