@@ -1,0 +1,9 @@
+--- 
+scope: https://www.googleapis.com/auth/calendar
+client_secret: xxxx
+client_id: xxxx
+mechanism: oauth_2
+refresh_token: xxxx
+access_token: xxxx
+gcal_mode: delete
+calender_id: xxxx
