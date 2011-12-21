@@ -179,7 +179,7 @@ page_token = nil
 result = client.execute(:api_method => srv.events.list,
                         :parameters => {'calendarId' => CALENDER_ID,
                           'maxResults' => '100',
-                          'timeZone' => 'Japan/Tokyo',
+                          'timeZone' => gcal_yaml["timezone"],
                           'timeMin' => stgcal,
                           'timeMax' => en})
 while true
@@ -195,7 +195,7 @@ while true
   result = client.execute(:api_method => srv.events.list,
                           :parameters => {'calendarId' => CALENDER_ID,
                             'maxResults' => '100',
-                            'timeZone' => 'Japan/Tokyo',
+                            'timeZone' => gcal_yaml["timezone"],
                             'timeMin' => stgcal,
                             'timeMax' => en,
                             'pageToken' => page_token})
