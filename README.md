@@ -18,6 +18,8 @@ SETUP
 
     % cp gcal.yaml ~/.gcal
 
+* Modify ~/.gcal to specify your calender_id.  You can check the calender_id in calender setting tab on your google calender
+
 * Enjoy!
 
 USAGE

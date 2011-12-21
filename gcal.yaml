@@ -1,3 +1,4 @@
+calender_id: xxxxxxxx@group.calendar.google.com
 timezone: 'Japan/Tokyo'
 # sync mode (delete or keep)
 gcal_mode: keep
