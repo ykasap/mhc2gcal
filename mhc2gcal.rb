@@ -222,15 +222,14 @@ db.search(date_from, date_to, OPTS[:category]).each{|date, mevs|
         break
       end
     }
+    event = {}
     if secret_event == true
-      title = "SECRET"
+      event['summary'] = "SECRET"
     else
-      title = NKF.nkf("-w", mev.subject)
+      event['summary'] = NKF.nkf("-w", mev.subject)
     end
     if mev.location and mev.location != ""
-      where = NKF.nkf("-w", mev.location)
-    else
-      where = ""
+      event['location'] = NKF.nkf("-w", mev.location)
     end
     if mev.time_b
       st = Time.parse("#{date.y}/#{date.m}/#{date.d} #{mev.time_b}").xmlschema
@@ -243,12 +242,13 @@ db.search(date_from, date_to, OPTS[:category]).each{|date, mevs|
       else
         en = Time.parse("#{date.y}/#{date.m}/#{date.d} #{mev.time_b}").xmlschema
       end
+      event['start'] = { 'dateTime' => st }
+      event['end'] = { 'dateTime' => en }
     else
       allday_start = Date::new(date.y.to_i, date.m.to_i, date.d.to_i)
       allday_end = allday_start + 1
-      st = allday_start.to_s
-      en = allday_end.to_s
-      allday = true
+      event['start'] = { 'date' => allday_start.to_s }
+      event['end'] = { 'date' => allday_end.to_s }
     end
     if OPTS[:description]
       headers = "Category: " + mev.category_as_string + "\n"
@@ -263,22 +263,7 @@ db.search(date_from, date_to, OPTS[:category]).each{|date, mevs|
           switch = false
         end
       }
-      desc = NKF.nkf("-w", headers + "\n" + mev.description.to_s)
-    end
-
-    event = {
-      'summary' => title,
-      'description' => desc
-    }
-    if where != ""
-      event['location'] = where
-    end
-    if allday
-      event['start'] = { 'date' => st }
-      event['end'] = { 'date' => en }
-    else
-      event['start'] = { 'dateTime' => st }
-      event['end'] = { 'dateTime' => en }
+      event['description'] = NKF.nkf("-w", headers + "\n" + mev.description.to_s)
     end
     mhc_gevs.push(event)
   }
