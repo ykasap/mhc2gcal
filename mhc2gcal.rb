@@ -273,9 +273,9 @@ gcal_gevs.uniq
 mhc_gevs.uniq
 
 # compare and delete EVENTs only in Google Calendar
-gcal_gevs.each{|gcal_gev|
+gcal_gevs.each { |gcal_gev|
   find_the_same_event = false
-  mhc_gevs.each{|mhc_gev|
+  mhc_gevs.each { |mhc_gev|
     if mhc_gev['summary'] == gcal_gev['summary'] &&
         mhc_gev['location'] == gcal_gev['location'] &&
         mhc_gev['start'] == gcal_gev['start'] &&
@@ -304,9 +304,9 @@ gcal_gevs.each{|gcal_gev|
 }
 
 # compare and create EVENTs only in MHC
-mhc_gevs.each{|mhc_gev|
+mhc_gevs.each { |mhc_gev|
   find_the_same_event = false
-  gcal_gevs.each{|gcal_gev|
+  gcal_gevs.each { |gcal_gev|
     if mhc_gev['summary'] == gcal_gev['summary'] &&
         mhc_gev['location'] == gcal_gev['location'] &&
         mhc_gev['start'] == gcal_gev['start'] &&
