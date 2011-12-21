@@ -29,53 +29,53 @@ def string_to_date(string, range)
   date_from = nil
   date_to   = nil
 
-  case (string .downcase)
+  case (string.downcase)
   when 'today'
-    date_from = MhcDate .new
+    date_from = MhcDate.new
   when 'tomorrow'
-    date_from = MhcDate .new .succ
+    date_from = MhcDate.new.succ
   when /^(sun|mon|tue|wed|thu|fri|sat)/
-    date_from = MhcDate .new .w_this(string .downcase)
+    date_from = MhcDate.new.w_this(string.downcase)
   when /^\d{8}$/
-    date_from = MhcDate .new(string)
+    date_from = MhcDate.new(string)
   when /^\d{6}$/
-    date_from = MhcDate .new(string + '01')
+    date_from = MhcDate.new(string + '01')
     if range
-      date_to = date_from .succ(range .to_i)
+      date_to = date_from.succ(range.to_i)
     else
-      date_to = MhcDate .new(string + format("%02d", date_from .m_days))
+      date_to = MhcDate.new(string + format("%02d", date_from.m_days))
     end
   when /^\d{4}$/
-    date_from = MhcDate .new(string + '0101')
+    date_from = MhcDate.new(string + '0101')
     if range
-      date_to = date_from .succ(range .to_i)
+      date_to = date_from.succ(range.to_i)
     else
-      date_to = MhcDate .new(string + '1231')
+      date_to = MhcDate.new(string + '1231')
     end
   else
     return nil
   end
 
-  date_to   = date_from .succ((range || '0') .to_i) if !date_to
+  date_to = date_from.succ((range || '0').to_i) if !date_to
   return [date_from, date_to]
 end
 
 def string_to_date2(s1, s2)
   item = []
-  [s1, s2] .each{|string|
-    case (string .downcase)
+  [s1, s2].each{|string|
+    case (string.downcase)
     when 'today'
-      item << MhcDate .new
+      item << MhcDate.new
     when 'tomorrow'
-      item << MhcDate .new .succ
+      item << MhcDate.new.succ
     when /^(sun|mon|tue|wed|thu|fri|sat)/
-      item << MhcDate .new .w_this(string .downcase)
+      item << MhcDate.new.w_this(string.downcase)
     when /^\d{8}$/
-      item << MhcDate .new(string)
+      item << MhcDate.new(string)
     when /^\d{6}$/
-      item << MhcDate .new(string + '01')
+      item << MhcDate.new(string + '01')
     when /^\d{4}$/
-      item << MhcDate .new(string + '0101')
+      item << MhcDate.new(string + '0101')
     else
       item << nil
     end
@@ -83,7 +83,7 @@ def string_to_date2(s1, s2)
   return item
 end
 
-date_from  = date_to = MhcDate .new
+date_from  = date_to = MhcDate.new
 proxy_mode = false
 proxy_auth = false
 
@@ -101,7 +101,7 @@ opt.on('--secret=CATEGORY',
        'Change the title of the event to \'SECRET\' space separated multiple values are allowed') {
   |v| OPTS[:secret] = v }
 opt.on('--date={string[+n],string-string}',
-       'Set a period of date. string is one of these: today, tomorrow, sun ... sat, yyyymmdd, yyyymm, yyyyyyyymm lists all days in the month and yyyy lists all days in the year. List n+1 days of schedules if +n is given. The default value is \'today+0\'') {
+       'Set a period of date. string is one of these: today, tomorrow, sun... sat, yyyymmdd, yyyymm, yyyyyyyymm lists all days in the month and yyyy lists all days in the year. List n+1 days of schedules if +n is given. The default value is \'today+0\'') {
   |v| OPTS[:date] = v }
 opt.on('--description', 'Add description') { OPTS[:description] = true }
 opt.on('--verbose', 'Verbose mode') { OPTS[:verbose] = true }
@@ -132,7 +132,7 @@ if OPTS[:secret]
   if OPTS[:secret] =~ /!/
     OPTS[:secret] = OPTS[:secret].delete('!')
   end
-  secrets = OPTS[:secret].split.collect{|x| x .downcase}
+  secrets = OPTS[:secret].split.collect{|x| x.downcase}
 end
 
 oauth_yaml = YAML.load_file(File.expand_path('~/.google-api.yaml'))
@@ -173,8 +173,8 @@ srv = client.discovered_api('calendar', 'v3')
 puts "Connected"
 
 # init arrays for EVENTs in Google Calendar and MHC
-gcal_gevs=[]
-mhc_gevs=[]
+gcal_gevs = []
+mhc_gevs = []
 
 # collect EVENTs from Google Calendarin the period of date
 puts "Collect EVENTs from Google Calendar"
@@ -211,9 +211,9 @@ end
 
 # collect EVENTs from MHC in the period of date
 puts "Collect EVENTs from MHC"
-db = MhcScheduleDB .new
-db .search(date_from, date_to, OPTS[:category]) .each{|date, mevs|
-  mevs .each {|mev|
+db = MhcScheduleDB.new
+db.search(date_from, date_to, OPTS[:category]).each{|date, mevs|
+  mevs.each {|mev|
     secret_event = false
     secrets.each{|secret_category|
       regexp = Regexp.new(secret_category, nil, "e")
@@ -232,16 +232,16 @@ db .search(date_from, date_to, OPTS[:category]) .each{|date, mevs|
     else
       where = ""
     end
-    if mev.time_b.to_s != ""
-      st = Time.parse(date.y.to_s + "/" + date.m.to_s + "/" + date.d.to_s + " " + mev.time_b.to_s).xmlschema
-      if mev.time_e.to_s != ""
+    if mev.time_b
+      st = Time.parse("#{date.y}/#{date.m}/#{date.d} #{mev.time_b}").xmlschema
+      if mev.time_e
         if mev.time_e.to_i < 86400
-          en = Time.parse(date.y.to_s + "/" + date.m.to_s + "/" + date.d.to_s + " " + mev.time_e.to_s).xmlschema
+          en = Time.parse("#{date.y}/#{date.m}/#{date.d} #{mev.time_e}").xmlschema
         else
-          en = Time.parse(date.y.to_s + "/" + date.m.to_s + "/" + date.d.to_s + " 23:59").xmlschema
+          en = Time.parse("#{date.y}/#{date.m}/#{date.d} 23:59").xmlschema
         end
       else
-        en = Time.parse(date.y.to_s + "/" + date.m.to_s + "/" + date.d.to_s + " " + mev.time_b.to_s).xmlschema
+        en = Time.parse("#{date.y}/#{date.m}/#{date.d} #{mev.time_b}").xmlschema
       end
     else
       allday_start = Date::new(date.y.to_i, date.m.to_i, date.d.to_i)
@@ -251,9 +251,9 @@ db .search(date_from, date_to, OPTS[:category]) .each{|date, mevs|
       allday = true
     end
     if OPTS[:description]
-      headers = "Category: " + mev .category_as_string + "\n"
+      headers = "Category: " + mev.category_as_string + "\n"
       switch = false
-      mev .non_xsc_header .split("\n") .each{|line|
+      mev.non_xsc_header.split("\n").each{|line|
         if line =~ /^(subject|from|to|cc|x-ur[il]):/i
           headers += line + "\n"
           switch = true
@@ -263,7 +263,7 @@ db .search(date_from, date_to, OPTS[:category]) .each{|date, mevs|
           switch = false
         end
       }
-      desc = NKF.nkf("-w", headers + "\n" + mev .description .to_s)
+      desc = NKF.nkf("-w", headers + "\n" + mev.description.to_s)
     end
 
     event = {
