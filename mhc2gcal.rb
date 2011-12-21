@@ -233,15 +233,15 @@ db .search(date_from, date_to, OPTS[:category]) .each{|date, mevs|
       where = ""
     end
     if mev.time_b.to_s != ""
-      st = Time.parse(date.y.to_s + "/" + date.m.to_s + "/" + date.d.to_s + " " + mev.time_b.to_s).gmtime.xmlschema
+      st = Time.parse(date.y.to_s + "/" + date.m.to_s + "/" + date.d.to_s + " " + mev.time_b.to_s).xmlschema
       if mev.time_e.to_s != ""
         if mev.time_e.to_i < 86400
-          en = Time.parse(date.y.to_s + "/" + date.m.to_s + "/" + date.d.to_s + " " + mev.time_e.to_s).gmtime.xmlschema
+          en = Time.parse(date.y.to_s + "/" + date.m.to_s + "/" + date.d.to_s + " " + mev.time_e.to_s).xmlschema
         else
-          en = Time.parse(date.y.to_s + "/" + date.m.to_s + "/" + date.d.to_s + " 23:59").gmtime.xmlschema
+          en = Time.parse(date.y.to_s + "/" + date.m.to_s + "/" + date.d.to_s + " 23:59").xmlschema
         end
       else
-        en = Time.parse(date.y.to_s + "/" + date.m.to_s + "/" + date.d.to_s + " " + mev.time_b.to_s).gmtime.xmlschema
+        en = Time.parse(date.y.to_s + "/" + date.m.to_s + "/" + date.d.to_s + " " + mev.time_b.to_s).xmlschema
       end
     else
       allday_start = Date::new(date.y.to_i, date.m.to_i, date.d.to_i)
@@ -268,9 +268,11 @@ db .search(date_from, date_to, OPTS[:category]) .each{|date, mevs|
 
     event = {
       'summary' => title,
-      'location' => where,
       'description' => desc
     }
+    if where != ""
+      event['location'] = where
+    end
     if allday
       event['start'] = { 'date' => st }
       event['end'] = { 'date' => en }
@@ -291,10 +293,8 @@ gcal_gevs.each{|gcal_gev|
   mhc_gevs.each{|mhc_gev|
     if mhc_gev['summary'] == gcal_gev['summary'] &&
         mhc_gev['location'] == gcal_gev['location'] &&
-        mhc_gev['start.date'] == gcal_gev['start.date'] &&
-        mhc_gev['end.date'] == gcal_gev['end.date'] &&
-        mhc_gev['start.dateTime'] == gcal_gev['start.dateTime'] &&
-        mhc_gev['end.dateTime'] == gcal_gev['end.dateTime'] &&
+        mhc_gev['start'] == gcal_gev['start'] &&
+        mhc_gev['end'] == gcal_gev['end'] &&
         mhc_gev['description'] == gcal_gev['description']
       find_the_same_event = true
       break
@@ -324,10 +324,8 @@ mhc_gevs.each{|mhc_gev|
   gcal_gevs.each{|gcal_gev|
     if mhc_gev['summary'] == gcal_gev['summary'] &&
         mhc_gev['location'] == gcal_gev['location'] &&
-        mhc_gev['start.date'] == gcal_gev['start.date'] &&
-        mhc_gev['end.date'] == gcal_gev['end.date'] &&
-        mhc_gev['start.dateTime'] == gcal_gev['start.dateTime'] &&
-        mhc_gev['end.dateTime'] == gcal_gev['end.dateTime'] &&
+        mhc_gev['start'] == gcal_gev['start'] &&
+        mhc_gev['end'] == gcal_gev['end'] &&
         mhc_gev['description'] == gcal_gev['description']
       find_the_same_event = true
       break
