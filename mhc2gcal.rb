@@ -159,9 +159,7 @@ if OPTS[:proxy_addr] && OPTS[:proxy_port]
 else
   puts "Connect to Google Calendar directly"
 end
-
 srv = client.discovered_api('calendar', 'v3')
-puts "Connected"
 
 # init arrays for EVENTs in Google Calendar and MHC
 gcal_gevs = []
