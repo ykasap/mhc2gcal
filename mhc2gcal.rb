@@ -87,12 +87,12 @@ date_from  = date_to = MhcDate.new
 proxy_mode = false
 proxy_auth = false
 
-OPTS = {}
-OPTS[:category]    = '!Holiday'
-OPTS[:secret]      = 'Private'
-OPTS[:verbose]     = false
-OPTS[:description] = false
-
+OPTS = {
+  :category    => '!Holiday',
+  :secret      => 'Private',
+  :verbose     => false,
+  :description => false,
+}
 opt = OptionParser.new
 opt.on('--category=CATEGORY',
        'Pick only in CATEGORY. \'!\' and space separated multiple values are allowed') {
@@ -118,13 +118,6 @@ when /^([^+]+)(\+(-?[\d]+))?/
   date_from, date_to = string_to_date($1, $3) || abort("Abort: Date option is wrong")
 else
   abort("Abort: Date option is wrong")
-end
-
-if OPTS[:proxy_addr] && OPTS[:proxy_port]
-  proxy_mode = true
-  if OPTS[:proxy_user] && OPTS[:proxy_pass]
-    proxy_auth = true
-  end
 end
 
 secrets = nil
@@ -155,19 +148,19 @@ else
   GCAL_DEL = false
 end
 
-# if proxy_mode
-#   GoogleCalendar::Service.proxy_addr=proxy_addr
-#   GoogleCalendar::Service.proxy_port=proxy_port
-#   if proxy_auth
-#     GoogleCalendar::Service.proxy_user=proxy_user
-#     GoogleCalendar::Service.proxy_pass=proxy_pass
-#     puts "Connect to Google Calendar through proxy(#{proxy_user}:#{proxy_pass}@#{proxy_addr}:#{proxy_port})"
-#   else
-#     puts "Connect to Google Calendar through proxy(#{proxy_addr}:#{proxy_port})"
-#   end
-# else
-#   puts "Connect to Google Calendar directly"
-# end
+if OPTS[:proxy_addr] && OPTS[:proxy_port]
+#  GoogleCalendar::Service.proxy_addr=proxy_addr
+#  GoogleCalendar::Service.proxy_port=proxy_port
+  if OPTS[:proxy_user] && OPTS[:proxy_pass]
+#    GoogleCalendar::Service.proxy_user=proxy_user
+#    GoogleCalendar::Service.proxy_pass=proxy_pass
+    puts "Connect to Google Calendar through proxy(#{proxy_user}:#{proxy_pass}@#{proxy_addr}:#{proxy_port})"
+  else
+    puts "Connect to Google Calendar through proxy(#{proxy_addr}:#{proxy_port})"
+  end
+else
+  puts "Connect to Google Calendar directly"
+end
 
 srv = client.discovered_api('calendar', 'v3')
 puts "Connected"
@@ -286,15 +279,15 @@ gcal_gevs.each { |gcal_gev|
     end
   }
   if find_the_same_event != true
-    if GCAL_DEL
+    if gcal_yaml["gcal_mode"] == 'delete'
       result = client.execute(:api_method => srv.events.delete,
-                              :parameters => {'calendarId' => CALENDER_ID, 'eventId' => gcal_gev['id']})
+                              :parameters => {'calendarId' => CALENDER_ID,'eventId' => gcal_gev['id']})
     end
     if OPTS[:verbose]
-      if GCAL_DEL
-        puts "Delete EVENT only in Google Calendar\n"
+      if gcal_yaml["gcal_mode"] == 'delete'
+        puts "Delete EVENT only in Google Calendar"
       else
-        puts "Keep EVENT only in Google Calendar\n"
+        puts "Keep EVENT only in Google Calendar"
       end
       puts "  What: #{gcal_gev['summary']}"
       puts "  When: #{gcal_gev['start']} - #{gcal_gev['end']}"
