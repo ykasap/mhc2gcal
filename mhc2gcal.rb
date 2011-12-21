@@ -55,14 +55,13 @@ def string_to_date(string, range)
   else
     return nil
   end
-
   date_to = date_from.succ((range || '0').to_i) if !date_to
   return [date_from, date_to]
 end
 
 def string_to_date2(s1, s2)
   item = []
-  [s1, s2].each{|string|
+  [s1, s2].each { |string|
     case (string.downcase)
     when 'today'
       item << MhcDate.new
@@ -119,13 +118,10 @@ opt.on('--verbose', 'Verbose mode') { OPTS[:verbose] = true }
 #opt.on('--proxy-pass=pass', 'Set the password of http proxy') { |v| OPTS[:proxy_pass] = v }
 opt.parse!(ARGV)
 
-secrets = nil
-if OPTS[:secret]
-  if OPTS[:secret] =~ /!/
-    OPTS[:secret] = OPTS[:secret].delete('!')
-  end
-  secrets = OPTS[:secret].split.collect{|x| x.downcase}
+if OPTS[:secret] =~ /!/
+  OPTS[:secret] = OPTS[:secret].delete('!')
 end
+secrets = OPTS[:secret].split.collect{|x| x.downcase}
 
 oauth_yaml = YAML.load_file(File.expand_path('~/.google-api.yaml'))
 gcal_yaml  = YAML.load_file(File.expand_path('~/.gcal'))
@@ -205,9 +201,9 @@ end
 puts "Collect EVENTs from MHC"
 db = MhcScheduleDB.new
 db.search(date_from, date_to, OPTS[:category]).each{|date, mevs|
-  mevs.each {|mev|
+  mevs.each { |mev|
     secret_event = false
-    secrets.each{|secret_category|
+    secrets.each { |secret_category|
       regexp = Regexp.new(secret_category, nil, "e")
       if regexp =~ mev.category_as_string.downcase
         secret_event = true
