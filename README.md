@@ -30,4 +30,6 @@ TODO
 ----
 * Bug: Duplication checking is failure with allday-event
 
+* Bug: Duplication checking is failure with Timezone
+
 * HTTP Proxy is temporally disabled
