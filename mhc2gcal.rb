@@ -101,8 +101,16 @@ opt.on('--secret=CATEGORY',
        'Change the title of the event to \'SECRET\' space separated multiple values are allowed') {
   |v| OPTS[:secret] = v }
 opt.on('--date={string[+n],string-string}',
-       'Set a period of date. string is one of these: today, tomorrow, sun... sat, yyyymmdd, yyyymm, yyyyyyyymm lists all days in the month and yyyy lists all days in the year. List n+1 days of schedules if +n is given. The default value is \'today+0\'') {
-  |v| OPTS[:date] = v }
+       'Set a period of date. string is one of these: today, tomorrow, sun... sat, yyyymmdd, yyyymm, yyyyyyyymm lists all days in the month and yyyy lists all days in the year. List n+1 days of schedules if +n is given. The default value is \'today+0\'') { |v| 
+  case (v)
+  when /^([^-]+)\-(.+)/
+    date_from, date_to = string_to_date2($1, $2) || abort("Abort: Date option is wrong")
+  when /^([^+]+)(\+(-?[\d]+))?/
+    date_from, date_to = string_to_date($1, $3) || abort("Abort: Date option is wrong")
+  else
+    abort("Abort: Date option is wrong")
+  end
+}
 opt.on('--description', 'Add description') { OPTS[:description] = true }
 opt.on('--verbose', 'Verbose mode') { OPTS[:verbose] = true }
 #opt.on('--proxy-addr=addr', 'Set the address of http proxy') { |v| OPTS[:proxy_addr] = v }
@@ -110,15 +118,6 @@ opt.on('--verbose', 'Verbose mode') { OPTS[:verbose] = true }
 #opt.on('--proxy-user=user', 'Set the username of http proxy') { |v| OPTS[:proxy_user] = v }
 #opt.on('--proxy-pass=pass', 'Set the password of http proxy') { |v| OPTS[:proxy_pass] = v }
 opt.parse!(ARGV)
-
-case (OPTS[:date])
-when /^([^-]+)\-(.+)/
-  date_from, date_to = string_to_date2($1, $2) || abort("Abort: Date option is wrong")
-when /^([^+]+)(\+(-?[\d]+))?/
-  date_from, date_to = string_to_date($1, $3) || abort("Abort: Date option is wrong")
-else
-  abort("Abort: Date option is wrong")
-end
 
 secrets = nil
 if OPTS[:secret]
