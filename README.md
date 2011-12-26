@@ -1,6 +1,10 @@
 mhc2gcal.rb
 ===========
 
+* Import MHC schedules into Google Calender
+
+* mhc2gcal.rb was originally developed at http://nao.river24.net/blog/category/mhc2gcal/ and this version is forked to use "Google API Client" instead of gcalapi as the library because gcalapi is using deprecated APIs
+
 SETUP
 -----
 * Install google-api-client
