@@ -280,7 +280,11 @@ gcal_gevs.each { |gcal_gev|
                               :parameters => {
                                 'calendarId' => gcal_yaml["calender_id"],
                                 'eventId' => gcal_gev['id']
-                              })
+                              }) 
+      if result.status > 300
+        ret = JSON.parse(result.response.body)
+        puts "ERROR: " + ret['error']['message']
+      end
     end
     if OPTS[:verbose]
       if gcal_yaml["gcal_mode"] == 'delete'
@@ -313,6 +317,10 @@ mhc_gevs.each { |mhc_gev|
                             :parameters => {'calendarId' => gcal_yaml["calender_id"]},
                             :body => JSON.dump(mhc_gev),
                             :headers => {'Content-Type' => 'application/json'})
+    if result.status > 300
+      ret = JSON.parse(result.response.body)
+      puts "ERROR: " + ret['error']['message']
+    end
     if OPTS[:verbose]
       puts "Create EVENT only in MHC"
       puts "  What: #{mhc_gev['summary']}"
