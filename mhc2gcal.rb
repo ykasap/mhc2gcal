@@ -130,7 +130,7 @@ secrets = OPTS[:secret].split.collect{|x| x.downcase}
 oauth_yaml = YAML.load_file(File.expand_path('~/.google-api.yaml'))
 gcal_yaml  = YAML.load_file(File.expand_path('~/.gcal'))
 
-client = Google::APIClient.new
+client = Google::APIClient.new({:application_version => Version, :application_name => 'mhc2gcal'})
 client.authorization.client_id = oauth_yaml["client_id"]
 client.authorization.client_secret = oauth_yaml["client_secret"]
 client.authorization.scope = oauth_yaml["scope"]
@@ -205,7 +205,7 @@ db.search(date_from, date_to, OPTS[:category]).each{|date, mevs|
   mevs.each { |mev|
     secret_event = false
     secrets.each { |secret_category|
-      regexp = Regexp.new(secret_category, nil, "e")
+      regexp = Regexp.new(secret_category, nil)
       if regexp =~ mev.category_as_string.downcase
         secret_event = true
         break
