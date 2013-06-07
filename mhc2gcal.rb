@@ -128,7 +128,7 @@ end
 secrets = OPTS[:secret].split.collect{|x| x.downcase}
 
 oauth_yaml = YAML.load_file(File.expand_path('~/.google-api.yaml'))
-gcal_yaml  = YAML.load_file(File.expand_path('~/.gcal'))
+gcal_yaml  = YAML.load_file(File.expand_path('~/.gcal.gapi'))
 
 client = Google::APIClient.new({:application_version => Version, :application_name => 'mhc2gcal'})
 client.authorization.client_id = oauth_yaml["client_id"]
@@ -177,12 +177,13 @@ result = client.execute(:api_method => srv.events.list,
                         :parameters => {'calendarId' => gcal_yaml["calender_id"],
                           'maxResults' => '100',
                           'timeZone' => gcal_yaml["timezone"],
-                          'timeMin' => stgcal,
+                          'timeMin' => st,
                           'timeMax' => en})
 while true
   events = result.data.items
   events.each do |event|
-    if event['start.date'] != nil or event['end'] != Time.mktime(date_from.y.to_i, date_from.m.to_i, date_from.d.to_i).gmtime.xmlschema # xxx: What's this?
+    if event['start']['date'] == nil or 
+       event['end']['date'].to_s != Date.new(date_from.y.to_i, date_from.m.to_i, date_from.d.to_i).to_s
       gcal_gevs.push(event)
     end
   end
@@ -193,7 +194,7 @@ while true
                           :parameters => {'calendarId' => gcal_yaml["calender_id"],
                             'maxResults' => '100',
                             'timeZone' => gcal_yaml["timezone"],
-                            'timeMin' => stgcal,
+                            'timeMin' => st,
                             'timeMax' => en,
                             'pageToken' => page_token})
 end
@@ -252,7 +253,7 @@ db.search(date_from, date_to, OPTS[:category]).each{|date, mevs|
           switch = false
         end
       }
-      event['description'] = NKF.nkf("-w", headers + "\n" + mev.description.to_s)
+      event['description'] = NKF.nkf("-w", headers + "\n" + mev.description.to_s).gsub(/\s+\z/m,"")
     end
     mhc_gevs.push(event)
   }
@@ -267,8 +268,8 @@ gcal_gevs.each { |gcal_gev|
   mhc_gevs.each { |mhc_gev|
     if mhc_gev['summary'] == gcal_gev['summary'] &&
         mhc_gev['location'] == gcal_gev['location'] &&
-        mhc_gev['start'] == gcal_gev['start'] &&
-        mhc_gev['end'] == gcal_gev['end'] &&
+        mhc_gev['start'] == gcal_gev['start'].to_hash &&
+        mhc_gev['end'] == gcal_gev['end'].to_hash &&
         mhc_gev['description'] == gcal_gev['description']
       find_the_same_event = true
       break
@@ -293,7 +294,7 @@ gcal_gevs.each { |gcal_gev|
         puts "Keep EVENT only in Google Calendar"
       end
       puts "  What: #{gcal_gev['summary']}"
-      puts "  When: #{gcal_gev['start']} - #{gcal_gev['end']}"
+      puts "  When: #{gcal_gev['start'].to_hash} - #{gcal_gev['end'].to_hash}"
       puts "  Where: #{gcal_gev['location']}"
     end
   end
@@ -305,8 +306,8 @@ mhc_gevs.each { |mhc_gev|
   gcal_gevs.each { |gcal_gev|
     if mhc_gev['summary'] == gcal_gev['summary'] &&
         mhc_gev['location'] == gcal_gev['location'] &&
-        mhc_gev['start'] == gcal_gev['start'] &&
-        mhc_gev['end'] == gcal_gev['end'] &&
+        mhc_gev['start'] == gcal_gev['start'].to_hash &&
+        mhc_gev['end'] == gcal_gev['end'].to_hash &&
         mhc_gev['description'] == gcal_gev['description']
       find_the_same_event = true
       break
